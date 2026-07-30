@@ -1,0 +1,125 @@
+name: release
+
+# ============================================================
+# 当推送 v* 格式的 tag（如 v1.0.0）时自动触发，
+# 打包项目并通过 GitHub Release 发布安装包。
+# ============================================================
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "版本号 (如 v1.0.0)"
+        required: true
+        type: string
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  # ============================================================
+  # 下载 MaaFramework 运行时依赖
+  # ============================================================
+  setup-deps:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      maa-version: ${{ steps.maa-version.outputs.tag }}
+    steps:
+      - name: 解析版本号
+        id: version
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "version=${{ inputs.version }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=${{ github.ref_name }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: 获取最新 MaaFramework 版本
+        id: maa-version
+        uses: pozetroninc/github-action-get-latest-release@master
+        with:
+          repository: MaaXYZ/MaaFramework
+          token: ${{ secrets.GITHUB_TOKEN }}
+          excludes: "draft"
+
+  # ============================================================
+  # 打包 Windows x64
+  # ============================================================
+  build-windows:
+    needs: setup-deps
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: 下载 MaaFramework 运行时
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          maa_ver="${{ needs.setup-deps.outputs.maa-version }}"
+          echo "Downloading MaaFramework $maa_ver for win-x86_64..."
+
+          gh release download "$maa_ver" \
+            --repo MaaXYZ/MaaFramework \
+            --pattern "MAA-win-x86_64*" \
+            --dir deps_download
+
+          # 解压到临时目录，处理内部目录结构
+          mkdir -p deps
+          cd deps_download
+          for f in *.zip; do
+            unzip -q "$f" -d ../deps_tmp
+          done
+
+          # MaaFramework zip 内通常有一层目录，将其内容移动到 deps/
+          # 如果直接包含 bin/ 则在 deps_tmp 下，否则在 deps_tmp/<子目录>/ 下
+          if [ -d "../deps_tmp/bin" ]; then
+            # 内容直接在根级
+            mv ../deps_tmp/* ../deps/
+          else
+            # 有一层子目录包裹
+            mv ../deps_tmp/*/* ../deps/
+          fi
+          rm -rf ../deps_tmp ../deps_download
+
+          # 验证 deps 结构
+          echo "deps 目录内容:"
+          ls -la ../deps/
+          if [ ! -d "../deps/bin" ]; then
+            echo "::error::deps/bin not found after extraction!"
+            ls -laR ../deps/
+            exit 1
+          fi
+          echo "MaaFramework deps ready."
+
+      - name: 安装 Python 依赖
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install json-with-comments
+
+      - name: 打包项目
+        shell: bash
+        run: |
+          python tools/install.py "${{ needs.setup-deps.outputs.version }}" win x86_64
+
+      - name: 创建 ZIP 压缩包
+        shell: bash
+        run: |
+          cd install
+          zip -r ../${{ github.event.repository.name }}-${{ needs.setup-deps.outputs.version }}-win-x86_64.zip .
+
+      - name: 发布到 GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.setup-deps.outputs.version }}
+          files: ${{ github.event.repository.name }}-${{ needs.setup-deps.outputs.version }}-win-x86_64.zip
+          generate_release_notes: true

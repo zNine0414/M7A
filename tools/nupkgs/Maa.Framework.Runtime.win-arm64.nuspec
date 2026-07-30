@@ -1,0 +1,7 @@
+    <id>Maa.Framework.Runtime.win-arm64</id>
+    <title>MaaFramework Runtime for win-arm64</title>
+    <description>Native binaries of MaaFramework Embedded for win-arm64.</description>
+  </metadata>
+  <files>
+    <file src="buildTransitive/Maa.Framework.Runtime.win-arm64.targets" target="buildTransitive" />
+    <file src="$root_path$\assets\MAA-win-aarch64\bin\**\*.dll*" target="bin" />

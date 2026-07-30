@@ -1,0 +1,7 @@
+    <id>Maa.Framework.Runtime.osx-arm64</id>
+    <title>MaaFramework Runtime for osx-arm64</title>
+    <description>Native binaries of MaaFramework Embedded for osx-arm64.</description>
+  </metadata>
+  <files>
+    <file src="buildTransitive/Maa.Framework.Runtime.osx-arm64.targets" target="buildTransitive" />
+    <file src="$root_path$\assets\MAA-macos-aarch64\bin\**\*.dylib*" target="bin" />

@@ -1,0 +1,10 @@
+{
+    "CloseEpic7": {
+        "action": {
+            "type": "StopApp",
+            "param": {
+                "package": "com.zlongame.cn.epicseven.bilibili"
+            }
+        }
+    }
+}

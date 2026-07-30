@@ -1,0 +1,10 @@
+{
+    "StartEpic7": {
+        "action": {
+            "type": "StartApp",
+            "param": {
+                "package": "com.zlongame.cn.epicseven.bilibili"
+            }
+        }
+    }
+}

@@ -1,0 +1,14 @@
+[project]
+name = "MaaPipPack"
+version = "0"
+requires-python = ">=3.9"
+authors = [{ name = "MaaXYZ" }]
+dependencies = ["tomlkit", "build", "wheel"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+managed = true
+package = false

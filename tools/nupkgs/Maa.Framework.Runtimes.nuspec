@@ -1,0 +1,14 @@
+    <id>Maa.Framework.Runtimes</id>
+    <title>MaaFramework Runtimes</title>
+    <description>An automation black-box testing framework based on image recognition.</description>
+    <dependencies>
+      <dependency id="Maa.Framework.Runtime.linux-arm64" version="$version$"/>
+      <dependency id="Maa.Framework.Runtime.linux-x64" version="$version$"/>
+      <dependency id="Maa.Framework.Runtime.osx-arm64" version="$version$"/>
+      <dependency id="Maa.Framework.Runtime.osx-x64" version="$version$"/>
+      <dependency id="Maa.Framework.Runtime.win-arm64" version="$version$"/>
+      <dependency id="Maa.Framework.Runtime.win-x64" version="$version$"/>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="$root_path$\docs\**\*.*" target="docs" />

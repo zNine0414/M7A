@@ -1,13 +1,34 @@
 {
     // ============================================================
+    // 主页检测（仿 M9A HomeFlag 模式）
+    //   left_events.png  — 左侧活动/入口图标
+    //   right_events.png — 右侧文字入口（Episode、战斗、竞技场、召唤、商店等）
+    //   任一张匹配即认为已到达主页，后续可追加更多版本截图
+    // ============================================================
+    "HomeFlag": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "home/left_events.png",
+                    "home/right_events.png"
+                ]
+            }
+        },
+        "action": "DoNothing"
+    },
+
+    // ============================================================
     // 开启游戏流程
     // ============================================================
     // 流程概述：
+    //   0. 如果已在主页 → 直接结束
     //   1. 通过模拟器启动游戏 App
     //   2. 等待游戏加载，直到公告弹窗出现
     //   3. 关闭公告弹窗（点击 X 关闭按钮）
     //   4. 等待"同意协议"勾选框出现
-    //   5. 点击屏幕正中间，完成登录进入游戏
+    //   5. 点击屏幕正中间，完成登录
+    //   6. 确认到达主页
     //
     // 官服与 B 服：
     //   - resource/pipeline/startup.json（官服）：定义官服包名
@@ -17,6 +38,7 @@
     "StartUp": {
         "action": "DoNothing",
         "next": [
+            "HomeFlag",
             "LaunchGame",
             "WaitAnnouncement",
             "WaitAgreement"
@@ -59,10 +81,7 @@
         "next": [
             "CloseAnnouncement"
         ],
-        "timeout": 120000,
-        "on_error": [
-            "CloseAnnouncement"
-        ]
+        "timeout": 120000
     },
     // 阶段3: 点击关闭按钮，关闭公告（重试直到公告消失）
     //   LoginCancel.png 模板尺寸 96×88，target_offset 缩到中心 50% 区域避免点到边缘
@@ -130,10 +149,7 @@
         "next": [
             "ClickScreenCenter"
         ],
-        "timeout": 60000,
-        "on_error": [
-            "ClickScreenCenter"
-        ]
+        "timeout": 60000
     },
     // 阶段5: 点击屏幕正中间完成登录
     "ClickScreenCenter": {
@@ -147,6 +163,93 @@
                     "post_delay": 1000
                 }
             }
-        }
+        },
+        "next": [
+            "CheckFriendPoints"
+        ]
+    },
+
+    // 阶段6: 处理登录后可能出现的"友情点"弹窗
+    //   先确认弹窗标题存在（避免误触其他页面的关闭按钮）
+    //   再点击关闭按钮 → 确认弹窗消失 → 继续
+    //   若弹窗不存在 → 直接进入主页判定
+    "CheckFriendPoints": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "home/friend_points_popup.png"
+                ]
+            }
+        },
+        "action": "DoNothing",
+        "next": [
+            "CloseFriendPoints"
+        ],
+        "timeout": 3000,
+        "on_error": [
+            "WaitHomeAfterLogin"
+        ]
+    },
+    "CloseFriendPoints": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "home/friend_points_close_btn.png"
+                ]
+            }
+        },
+        "action": {
+            "type": "Click",
+            "param": {
+                "target": true
+            }
+        },
+        "post_delay": 800,
+        "next": [
+            "CheckFriendPointsGone"
+        ],
+        "on_error": [
+            "WaitHomeAfterLogin"
+        ]
+    },
+    "CheckFriendPointsGone": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "home/friend_points_popup.png"
+                ]
+            }
+        },
+        "action": "DoNothing",
+        "next": [
+            "CloseFriendPoints"
+        ],
+        "timeout": 1500,
+        "on_error": [
+            "WaitHomeAfterLogin"
+        ],
+        "max_hit": 5
+    },
+
+    // 阶段7: 确认到达主页
+    "WaitHomeAfterLogin": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "home/left_events.png",
+                    "home/right_events.png"
+                ]
+            }
+        },
+        "action": "DoNothing",
+        "timeout": 30000,
+        "on_error": [
+            "ClickScreenCenter"
+        ],
+        "max_hit": 5
     }
 }

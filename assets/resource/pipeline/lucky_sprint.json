@@ -1,0 +1,251 @@
+{
+    // ============================================================
+    // 幸运冲刺 - 核心循环
+    // ============================================================
+    // 入口：点击幸运冲刺 bar 进入活动页，然后由 Python 自定义动作
+    //       lucky_sprint_core 驱动核心循环（OCR + 策略 + 点击）。
+    // 活动结束后可直接删除本文件和 image/26summer/ 下相关图片。
+    // ============================================================
+
+    // ── 入口 ──────────────────────────────────────────────
+    "ClickLuckySprintBar": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "26summer/summer_lucky_sprint_bar.png"
+                ]
+            }
+        },
+        "action": {
+            "type": "Click",
+            "param": {
+                "target": true,
+                "target_offset": [
+                    34,
+                    22,
+                    -68,
+                    -44
+                ]
+            }
+        },
+        "post_delay": 2000,
+        "next": [
+            "LuckySprintCore"
+        ],
+        "on_error": [
+            "LuckySprintBarNotFound"
+        ]
+    },
+    "LuckySprintBarNotFound": {
+        "action": "DoNothing",
+        "focus": {
+            "Node.Action.Starting": "<span style=\"color:crimson;\">未找到幸运冲刺入口</span>"
+        }
+    },
+
+    // ── 核心循环入口 ─────────────────────────────────────
+    "LuckySprintCore": {
+        "action": {
+            "type": "Custom",
+            "param": {
+                "custom_action": "lucky_sprint_core",
+                "custom_action_param": {
+                    "max_rounds": 100,
+                    "min_drinks": 1,
+                    "loop_forever": false
+                }
+            }
+        }
+    },
+
+    // ── OCR 识别节点 ─────────────────────────────────────
+    "OCR_Distance": {
+        "recognition": {
+            "type": "OCR",
+            "param": {
+                "roi": [914, 327, 88, 55],
+                "expected": "\\d+",
+                "only_rec": true
+            }
+        },
+        "action": "DoNothing"
+    },
+    "OCR_Level": {
+        "recognition": {
+            "type": "OCR",
+            "param": {
+                "roi": [77, 754, 74, 42],
+                "only_rec": true
+            }
+        },
+        "action": "DoNothing"
+    },
+    "OCR_DrinkCount": {
+        "recognition": {
+            "type": "OCR",
+            "param": {
+                "roi": [802, 965, 123, 41],
+                "only_rec": true
+            }
+        },
+        "action": "DoNothing"
+    },
+    "OCR_DrinkAvailable": {
+        "recognition": {
+            "type": "OCR",
+            "param": {
+                "roi": [164, 869, 99, 32],
+                "expected": "\\d+",
+                "only_rec": true
+            }
+        },
+        "action": "DoNothing"
+    },
+
+    // ── 模板匹配节点（由 Python run_recognition 调用） ──
+    "Find_RunBtn": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": ["26summer/lucky_sprint_run_confirm_btn.png"]
+            }
+        },
+        "action": "DoNothing"
+    },
+    "Find_ProtectBtn": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": ["26summer/lucky_sprint_protect_btn.png"]
+            }
+        },
+        "action": "DoNothing"
+    },
+    "Find_ProtectUse": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": ["26summer/lucky_sprint_protect_btn_use.png"]
+            }
+        },
+        "action": "DoNothing"
+    },
+    "Find_BoostBtn": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": ["26summer/lucky_sprint_boost_btn.png"]
+            }
+        },
+        "action": "DoNothing"
+    },
+    "Find_BoostUse": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": ["26summer/lucky_sprint_boost_btn_use.png"]
+            }
+        },
+        "action": "DoNothing"
+    },
+    "Find_LuckyBtn": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": ["26summer/lucky_sprint_lucky_charm_btn.png"]
+            }
+        },
+        "action": "DoNothing"
+    },
+    "Find_LuckyUse": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": ["26summer/lucky_sprint_lucky_charm_btn_use.png"]
+            }
+        },
+        "action": "DoNothing"
+    },
+    "Find_RewardResult": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": ["26summer/lucky_sprint_reward_result.png"]
+            }
+        },
+        "action": "DoNothing"
+    },
+    "Find_RewardClose": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": ["26summer/lucky_sprint_reward_confirm_btn.png"]
+            }
+        },
+        "action": "DoNothing"
+    },
+    "Find_Settlement": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": ["26summer/lucky_sprint_settlement_panel.png"]
+            }
+        },
+        "action": "DoNothing"
+    },
+    "Find_SettlementOK": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": ["26summer/lucky_sprint_settlement_panel_ok_btn.png"]
+            }
+        },
+        "action": "DoNothing"
+    },
+    "Find_DrinkClaim": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": ["26summer/lucky_sprint_energy_drink_claim.png"]
+            }
+        },
+        "action": "DoNothing"
+    },
+    "Find_InfoBtn": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": ["26summer/lucky_sprint_info_btn.png"]
+            }
+        },
+        "action": "DoNothing"
+    },
+    "Find_FirstRewardDetail": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": ["26summer/lucky_sprint_first_reward_detail_btn.png"]
+            }
+        },
+        "action": "DoNothing"
+    },
+    "Find_300mFirstPass": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": ["26summer/lucky_sprint_300m_first_pass.png"]
+            }
+        },
+        "action": "DoNothing"
+    },
+    "Find_300mFirstPassDone": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": ["26summer/lucky_sprint_300m_first_pass_done.png"]
+            }
+        },
+        "action": "DoNothing"
+    }
+}

@@ -1,0 +1,82 @@
+{
+    // ============================================================
+    // 友情点弹窗测试
+    // 关闭弹窗直到消失，用于验证弹窗模板匹配是否正常
+    // ============================================================
+
+    "TestFriendPoints": {
+        "action": "DoNothing",
+        "next": [
+            "CheckFriendPointsTest"
+        ]
+    },
+
+    "CheckFriendPointsTest": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "home/friend_points_popup.png"
+                ]
+            }
+        },
+        "action": "DoNothing",
+        "next": [
+            "CloseFriendPointsTest"
+        ],
+        "timeout": 3000,
+        "on_error": [
+            "TestPassed"
+        ]
+    },
+    "CloseFriendPointsTest": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "home/friend_points_close_btn.png"
+                ]
+            }
+        },
+        "action": {
+            "type": "Click",
+            "param": {
+                "target": true
+            }
+        },
+        "post_delay": 800,
+        "next": [
+            "CheckFriendPointsGoneTest"
+        ],
+        "on_error": [
+            "TestPassed"
+        ]
+    },
+
+    "CheckFriendPointsGoneTest": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "home/friend_points_popup.png"
+                ]
+            }
+        },
+        "action": "DoNothing",
+        "next": [
+            "CloseFriendPointsTest"
+        ],
+        "timeout": 1500,
+        "on_error": [
+            "TestPassed"
+        ],
+        "max_hit": 10
+    },
+
+    "TestPassed": {
+        "action": "DoNothing",
+        "focus": {
+            "Node.Action.Starting": "<span style=\"color:green;\">测试通过：弹窗已关闭</span>"
+        }
+    }
+}

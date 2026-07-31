@@ -14,7 +14,15 @@
       "Bash(find \"C:/Users/Administrator/AppData/Roaming/Code/User/globalStorage/nekosu.maa-support\" -maxdepth 2 -type f 2>/dev/null | head -20)",
       "Read(//c/Users/Administrator/.vscode/**)",
       "Read(//c/Users/Administrator/AppData/Roaming/Code/**)",
-      "Bash(git commit -m 'feat: 实现游戏自动登录流程及触控修复 *)"
+      "Bash(git commit -m 'feat: 实现游戏自动登录流程及触控修复 *)",
+      "Bash(python -c \"from PIL import Image; img = Image.open\\('assets/resource/image/26summer/summer_epic_sprint_icon.png'\\); print\\(f'{img.size[0]}x{img.size[1]}'\\)\")",
+      "Bash(python -c \"import struct; f=open\\('assets/resource/image/26summer/summer_epic_sprint_icon.png','rb'\\); f.seek\\(16\\); w=struct.unpack\\('>I',f.read\\(4\\)\\)[0]; h=struct.unpack\\('>I',f.read\\(4\\)\\)[0]; print\\(f'{w}x{h}'\\)\")",
+      "Bash(python -c \"import struct; f=open\\('assets/resource/image/26summer/summer_lucky_sprint_bar.png','rb'\\); f.seek\\(16\\); w=struct.unpack\\('>I',f.read\\(4\\)\\)[0]; h=struct.unpack\\('>I',f.read\\(4\\)\\)[0]; print\\(f'{w}x{h}'\\)\")",
+      "Bash(python -c \"from maa.context import Context; from maa.custom_recognition import CustomRecognition; help\\(CustomRecognition.AnalyzeResult\\)\")",
+      "Bash(python -c ' *)",
+      "Bash(python -c \"import maa.define; r = maa.define.RecognitionDetail; print\\(dir\\(r\\)\\)\")",
+      "Bash(python -c \"import maa.define; r = maa.define.RecognitionDetail; print\\(r.__dataclass_fields__.keys\\(\\)\\)\")",
+      "Bash(git commit -m 'feat: 幸运冲刺自动化 + 主页/友情点判定 + 双场景入口 *)"
     ]
   }
 }

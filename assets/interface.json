@@ -45,8 +45,12 @@
             "entry": "StartUp"
         },
         {
-            "name": "点击测试",
-            "entry": "TestClickCenter"
+            "name": "夏日-幸运冲刺",
+            "entry": "SummerLuckySprint"
+        },
+        {
+            "name": "友情点弹窗测试",
+            "entry": "TestFriendPoints"
         }
     ]
 }

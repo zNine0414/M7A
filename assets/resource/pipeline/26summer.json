@@ -1,0 +1,86 @@
+{
+    // ============================================================
+    // 夏日活动 - 共享入口
+    // 主页 → 点击夏日活动图标，进入夏日活动页面。
+    // 各子活动（如幸运冲刺）由独立 pipeline 文件接管后续流程。
+    // ============================================================
+
+    "SummerLuckySprint": {
+        "action": "DoNothing",
+        "next": [
+            "CheckAlreadyInLuckySprint",
+            "HomeCheck"
+        ]
+    },
+
+    // 预检：如果已在幸运冲刺界面（距离 OCR 可读数）→ 跳过导航
+    "CheckAlreadyInLuckySprint": {
+        "recognition": {
+            "type": "OCR",
+            "param": {
+                "roi": [914, 327, 88, 55],
+                "expected": "\\d+",
+                "only_rec": true
+            }
+        },
+        "action": "DoNothing",
+        "next": [
+            "LuckySprintCore"
+        ]
+    },
+
+    // 确认在主页
+    "HomeCheck": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "home/left_events.png",
+                    "home/right_events.png"
+                ]
+            }
+        },
+        "action": "DoNothing",
+        "next": [
+            "ClickSummerIcon"
+        ],
+        "timeout": 5000
+    },
+
+    // 点击夏日活动入口 → 交给 lucky_sprint.json
+    "ClickSummerIcon": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "26summer/summer_epic_sprint_icon.png"
+                ]
+            }
+        },
+        "action": {
+            "type": "Click",
+            "param": {
+                "target": true,
+                "target_offset": [
+                    26,
+                    24,
+                    -53,
+                    -48
+                ]
+            }
+        },
+        "post_delay": 2000,
+        "next": [
+            "ClickLuckySprintBar"
+        ],
+        "on_error": [
+            "SummerIconNotFound"
+        ]
+    },
+    "SummerIconNotFound": {
+        "action": "DoNothing",
+        "focus": {
+            "Node.Action.Starting": "<span style=\"color:crimson;\">未找到夏日活动入口，请确认已在大厅主页</span>"
+        }
+    }
+}

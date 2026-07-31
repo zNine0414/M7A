@@ -118,6 +118,13 @@ def install_resource():
 
     interface["version"] = version
 
+    # 修正 agent 路径：源码中 interface.json 在 assets/ 下需 ../agent，
+    # 打包后 interface.json 与 agent/ 同级，改为 ./agent
+    if "agent" in interface and "child_args" in interface["agent"]:
+        interface["agent"]["child_args"] = [
+            arg.replace("../agent/", "./agent/") for arg in interface["agent"]["child_args"]
+        ]
+
     with open(install_path / "interface.json", "w", encoding="utf-8") as f:
         jsonc.dump(interface, f, ensure_ascii=False, indent=4)
 

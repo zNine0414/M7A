@@ -2,7 +2,19 @@
   "permissions": {
     "allow": [
       "Bash(git add *)",
-      "Bash(git commit *)"
+      "Bash(git commit *)",
+      "Bash(git tag *)",
+      "Bash(git push *)",
+      "Bash(python -c \"from PIL import Image; img = Image.open\\('assets/resource/image/login/LoginCancel.png'\\); print\\(f'{img.size[0]}x{img.size[1]}'\\)\")",
+      "Bash(python -c \"import struct; f=open\\('assets/resource/image/login/LoginCancel.png','rb'\\); f.seek\\(16\\); w=struct.unpack\\('>I',f.read\\(4\\)\\)[0]; h=struct.unpack\\('>I',f.read\\(4\\)\\)[0]; print\\(f'{w}x{h}'\\)\")",
+      "Bash(find \"C:/Users/Administrator/AppData\" -name \"*.json\" -path \"*maa*\" 2>/dev/null | head -10; find \"C:/Users/Administrator/AppData\" -name \"*.json\" -path \"*Maa*\" 2>/dev/null | head -10; find \"C:/Users/Administrator/AppData\" -name \"*.json\" -path \"*nicegui*\" 2>/dev/null | head -10)",
+      "Read(//c/Users/Administrator/AppData/**)",
+      "Bash(find \"C:/Users/Administrator/AppData/Roaming/Code/User/globalStorage/nekosu.maa-support\" -name \"*.json\" 2>/dev/null | head -20)",
+      "Read(//c/Users/Administrator/AppData/Roaming/Code/User/globalStorage/nekosu.maa-support/**)",
+      "Bash(find \"C:/Users/Administrator/AppData/Roaming/Code/User/globalStorage/nekosu.maa-support\" -maxdepth 2 -type f 2>/dev/null | head -20)",
+      "Read(//c/Users/Administrator/.vscode/**)",
+      "Read(//c/Users/Administrator/AppData/Roaming/Code/**)",
+      "Bash(git commit -m 'feat: 实现游戏自动登录流程及触控修复 *)"
     ]
   }
 }

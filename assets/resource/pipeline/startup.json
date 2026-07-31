@@ -1,9 +1,151 @@
 {
-    "StartEpic7": {
+    // ============================================================
+    // 开启游戏流程
+    // ============================================================
+    // 流程概述：
+    //   1. 通过模拟器启动游戏 App
+    //   2. 等待游戏加载，直到公告弹窗出现
+    //   3. 关闭公告弹窗（点击 X 关闭按钮）
+    //   4. 等待"同意协议"勾选框出现
+    //   5. 点击屏幕正中间，完成登录进入游戏
+    //
+    // 官服与 B 服：
+    //   - resource/pipeline/startup.json（官服）：定义官服包名
+    //   - resource_bilibili/pipeline/startup.json（B 服）：仅覆写 LaunchGame 的包名
+    //   其余所有图片和流程节点均为共享资源，放在 resource/ 下
+    // ============================================================
+    "StartUp": {
+        "action": "DoNothing",
+        "next": [
+            "LaunchGame",
+            "WaitAnnouncement",
+            "WaitAgreement"
+        ]
+    },
+    // 阶段1: 启动游戏 App
+    "LaunchGame": {
         "action": {
             "type": "StartApp",
             "param": {
-                "package": "com.zlongame.cn.epicseven.bilibili"
+                "package": "com.zlongame.cn.epicseven"
+            }
+        },
+        "post_delay": 5000,
+        "next": [
+            "WaitAnnouncement"
+        ],
+        "on_error": [
+            "LaunchGameFailed"
+        ]
+    },
+    "LaunchGameFailed": {
+        "action": "DoNothing",
+        "focus": {
+            "Node.Action.Starting": "<span style=\"color:crimson;\">启动游戏失败，请检查是否已连接模拟器</span>"
+        }
+    },
+    // 阶段2: 等待公告弹窗出现
+    "WaitAnnouncement": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "login/LoginAnnouncement.png"
+                ],
+                "threshold": 0.6
+            }
+        },
+        "action": "DoNothing",
+        "next": [
+            "CloseAnnouncement"
+        ],
+        "timeout": 120000,
+        "on_error": [
+            "CloseAnnouncement"
+        ]
+    },
+    // 阶段3: 点击关闭按钮，关闭公告（重试直到公告消失）
+    //   LoginCancel.png 模板尺寸 96×88，target_offset 缩到中心 50% 区域避免点到边缘
+    //   若找不到关闭按钮（公告已消失）→ 直接跳到检测用户协议
+    "CloseAnnouncement": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "login/LoginCancel.png"
+                ]
+            }
+        },
+        "action": {
+            "type": "Click",
+            "param": {
+                "target": true,
+                "target_offset": [
+                    24,
+                    22,
+                    -48,
+                    -44
+                ]
+            }
+        },
+        "post_delay": 800,
+        "next": [
+            "CheckAnnouncementGone"
+        ],
+        "on_error": [
+            "WaitAgreement"
+        ]
+    },
+    "CheckAnnouncementGone": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "login/LoginAnnouncement.png"
+                ],
+                "threshold": 0.6
+            }
+        },
+        "action": "DoNothing",
+        "next": [
+            "CloseAnnouncement"
+        ],
+        "timeout": 1500,
+        "on_error": [
+            "WaitAgreement"
+        ],
+        "max_hit": 10
+    },
+    // 阶段4: 等待"同意协议"勾选框
+    "WaitAgreement": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "login/AgreementCheckbox.png"
+                ]
+            }
+        },
+        "action": "DoNothing",
+        "next": [
+            "ClickScreenCenter"
+        ],
+        "timeout": 60000,
+        "on_error": [
+            "ClickScreenCenter"
+        ]
+    },
+    // 阶段5: 点击屏幕正中间完成登录
+    "ClickScreenCenter": {
+        "action": {
+            "type": "Custom",
+            "param": {
+                "custom_action": "click_screen_center",
+                "custom_action_param": {
+                    "offset_x": 0,
+                    "offset_y": 0,
+                    "post_delay": 1000
+                }
             }
         }
     }

@@ -1,0 +1,319 @@
+{
+    // ============================================================
+    // 竞技场(NPC 对战)
+    //   主页 → 竞技场入口 → 普通竞技场 → 切到 NPC 对战 → 主循环
+    // 主循环由 Python custom action arena_core 驱动:
+    //   固定点选 NPC → 确定挑战 → (购买旗帜/装备提示弹窗) →
+    //   扫荡作战 → 结算 → 刷新循环
+    // 每日免费 5 次挑战,用完后弹购买窗可友情点购买 1 次(+5),
+    // 再次弹购买窗 → 结束,系统返回键逐级回主页。
+    // ============================================================
+
+    // ── 入口 ──────────────────────────────────────────────
+    "ArenaDaily": {
+        "action": "DoNothing",
+        "next": [
+            "CheckArenaHome"
+        ]
+    },
+
+    // 确认在主页
+    "CheckArenaHome": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "home/left_events.png",
+                    "home/right_events.png"
+                ]
+            }
+        },
+        "action": "DoNothing",
+        "next": [
+            "ClickArenaIcon"
+        ],
+        "timeout": 10000,
+        "on_error": [
+            "ArenaNavError"
+        ]
+    },
+
+    // 点击竞技场入口
+    "ClickArenaIcon": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "arena/arena_icon.png"
+                ]
+            }
+        },
+        "action": {
+            "type": "Click",
+            "param": {
+                "target": true,
+                "target_offset": [
+                    26,
+                    10,
+                    -53,
+                    -21
+                ]
+            }
+        },
+        "post_delay": 2000,
+        "next": [
+            "ClickNormalArena"
+        ],
+        "on_error": [
+            "ArenaNavError"
+        ]
+    },
+
+    // 点击普通竞技场入口
+    "ClickNormalArena": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "arena/normal_arena_entry.png"
+                ]
+            }
+        },
+        "action": {
+            "type": "Click",
+            "param": {
+                "target": true,
+                "target_offset": [
+                    97,
+                    22,
+                    -195,
+                    -44
+                ]
+            }
+        },
+        "next": [
+            // 段位弹窗在 → 点关闭后 JumpBack 回来继续轮询
+            "[JumpBack]ClickRankClose",
+            // 无弹窗(或已关) → 切换 NPC 对战
+            "ClickNpcSwitch"
+        ],
+        "on_error": [
+            "ArenaNavError"
+        ]
+    },
+
+    // 段位变化弹窗关闭(进入普通竞技场后可能弹出)
+    //   被 [JumpBack] 引用:命中点击后自动返回父节点继续识别 next
+    "ClickRankClose": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "arena/rank_close_btn.png"
+                ]
+            }
+        },
+        "action": {
+            "type": "Click",
+            "param": {
+                "target": true
+            }
+        },
+        "post_delay": 800
+    },
+
+    // 切换到 NPC 对战
+    "ClickNpcSwitch": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": [
+                    "arena/npc_switch_btn.png"
+                ]
+            }
+        },
+        "action": {
+            "type": "Click",
+            "param": {
+                "target": true,
+                "target_offset": [
+                    80,
+                    31,
+                    -161,
+                    -63
+                ]
+            }
+        },
+        "post_delay": 2000,
+        "next": [
+            "ArenaCore"
+        ],
+        "on_error": [
+            "ArenaNavError"
+        ]
+    },
+
+    "ArenaNavError": {
+        "action": "DoNothing",
+        "focus": {
+            "Node.Action.Starting": "<span style=\"color:crimson;\">竞技场导航失败,请确认已在大厅主页后重试</span>"
+        }
+    },
+
+    // ── 主循环入口 ─────────────────────────────────────────
+    "ArenaCore": {
+        "action": {
+            "type": "Custom",
+            "param": {
+                "custom_action": "arena_core",
+                "custom_action_param": {
+                    "max_rounds": 20
+                }
+            }
+        }
+    },
+
+    // ── 模板识别节点(由 Python run_recognition 调用) ──────
+    // NPC 对战页标志:切换按钮只有该页面有,用于判定"已回到 NPC 列表页"
+    "Find_NpcSwitch": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": ["arena/npc_switch_btn.png"]
+            }
+        },
+        "action": "DoNothing"
+    },
+    // 准备页主按钮:有扫荡次数时为扫荡键,次数用尽后变成"战斗开始"键(进真实战斗)
+    "Find_BattleStartBtn": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": ["arena/battle_start_btn.png"]
+            }
+        },
+        "action": "DoNothing"
+    },
+    // 真实战斗战场标志(局内图标),用于判定是否已进入战场
+    "Find_InBattleIcon": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": ["arena/in_battle_icon.png"]
+            }
+        },
+        "action": "DoNothing"
+    },
+    // 战场内"开始自动战斗"按钮:点一次后 AI 托管,相当于扫荡
+    "Find_AutoBattleBtn": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": ["arena/auto_battle_btn.png"]
+            }
+        },
+        "action": "DoNothing"
+    },
+    // 自动战斗完成的确认图标:真实战斗打完弹出,点击后回到 NPC 列表页
+    "Find_AutoDoneConfirm": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": ["arena/auto_battle_done_confirm.png"]
+            }
+        },
+        "action": "DoNothing"
+    },
+    // 购买弹窗内"友情点数购买旗帜次数上限"提示:出现 = 无法再买 → 应点取消结束
+    "Find_BuyLimitFlag": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": ["arena/buy_limit_flag.png"]
+            }
+        },
+        "action": "DoNothing"
+    },
+    // 购买弹窗的取消键:无购买次数时点击 → 回到 NPC 列表页
+    "Find_BuyCancelBtn": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": ["arena/buy_cancel_btn.png"]
+            }
+        },
+        "action": "DoNothing"
+    },
+    "Find_ArenaConfirm": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": ["arena/confirm_btn.png"]
+            }
+        },
+        "action": "DoNothing"
+    },
+    "Find_SweepBtn": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": ["arena/sweep_btn.png"]
+            }
+        },
+        "action": "DoNothing"
+    },
+    "Find_SweepResult": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": ["arena/sweep_result.png"]
+            }
+        },
+        "action": "DoNothing"
+    },
+    "Find_SweepConfirm": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": ["arena/sweep_confirm.png"]
+            }
+        },
+        "action": "DoNothing"
+    },
+    "Find_BuyFlagPopup": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": ["arena/buy_flag_popup.png"]
+            }
+        },
+        "action": "DoNothing"
+    },
+    "Find_BuyFlagBtn": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": ["arena/buy_flag_btn.png"]
+            }
+        },
+        "action": "DoNothing"
+    },
+    "Find_EquipTipPopup": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": ["arena/equip_tip_popup.png"]
+            }
+        },
+        "action": "DoNothing"
+    },
+    "Find_EquipTipConfirm": {
+        "recognition": {
+            "type": "TemplateMatch",
+            "param": {
+                "template": ["arena/equip_tip_confirm.png"]
+            }
+        },
+        "action": "DoNothing"
+    }
+}

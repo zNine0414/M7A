@@ -51,6 +51,10 @@
         {
             "name": "友情点弹窗测试",
             "entry": "TestFriendPoints"
+        },
+        {
+            "name": "竞技场",
+            "entry": "ArenaDaily"
         }
     ]
 }
